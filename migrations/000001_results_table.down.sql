@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS results;
+DROP TYPE IF EXISTS board_name;
