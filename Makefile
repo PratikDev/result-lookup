@@ -40,6 +40,12 @@ down:
 db:
 	docker exec -it $(POSTGRES_HOST) psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
+redis:
+	docker exec -it redis redis-cli -a $(REDIS_PASSWORD)
+
+logs:
+	docker logs -f result-lookup-api
+
 clean:
 	docker compose down --remove-orphans -v
 

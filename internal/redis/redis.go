@@ -12,7 +12,6 @@ import (
 func InitRedis(logger *slog.Logger) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_ADDR"),
-		Username: os.Getenv("REDIS_USERNAME"),
 		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,  // use default DB
 	})
