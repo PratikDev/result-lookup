@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/pratikdev/result-lookup/internal/models"
@@ -20,14 +21,32 @@ func GetHealth(w http.ResponseWriter, r *http.Request) {
 func GetResult(w http.ResponseWriter, r *http.Request, rdb *redis.Client, logger *slog.Logger, validate *validator.Validate) {
 	queryParams := r.URL.Query()
 
+	roll, err := strconv.Atoi(queryParams.Get("roll"))
+	if err != nil {
+		http.Error(w, "invalid roll number", http.StatusBadRequest)
+    return
+	}
+
+	reg, err := strconv.Atoi(queryParams.Get("reg"))
+	if err != nil {
+		http.Error(w, "invalid reg number", http.StatusBadRequest)
+    return
+	}
+
+	examYear, err := strconv.Atoi(queryParams.Get("exam_year"))
+	if err != nil {
+		http.Error(w, "invalid exam year", http.StatusBadRequest)
+    return
+	}
+
 	requestBody := models.ResultRequest{
-		Roll: queryParams.Get("roll"),
-		Reg: queryParams.Get("reg"),
-		ExamYear: queryParams.Get("exam_year"),
+		Roll: roll,
+		Reg: reg,
+		ExamYear: examYear,
 	}
 
 	// validate
-	err := validate.Struct(requestBody)
+	err = validate.Struct(requestBody)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -53,7 +72,7 @@ func GetResult(w http.ResponseWriter, r *http.Request, rdb *redis.Client, logger
 		return
 	}
 
-	resultKey := fmt.Sprintf("result:%s:%s:%s", requestBody.Roll, requestBody.Reg, requestBody.ExamYear)
+	resultKey := fmt.Sprintf("result:%d:%d:%d", requestBody.Roll, requestBody.Reg, requestBody.ExamYear)
 	result, err := redisClient.Get(rdb, logger, resultKey)
 	if err != nil {
 		code := http.StatusInternalServerError

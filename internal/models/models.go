@@ -2,9 +2,9 @@ package models
 
 // all go types are string cause we receiving the value as query params
 type ResultRequest struct {
-	Roll string `json:"roll" db:"roll" validate:"required,max=20,number"`
-	Reg string `json:"reg" db:"reg" validate:"required,max=40,number"`
-	ExamYear string `json:"exam_year" db:"exam_year" validate:"required,len=4,number,gt=2000,lt=2200"`
+	Roll int `json:"roll" db:"roll" validate:"required"`
+	Reg int `json:"reg" db:"reg" validate:"required"`
+	ExamYear int `json:"exam_year" db:"exam_year" validate:"required,gt=2000,lt=2200"`
 }
 
 type ResultResponse struct {
