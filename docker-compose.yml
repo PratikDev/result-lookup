@@ -1,8 +1,8 @@
 services:
-  app:
+  api:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.api
     container_name: result-lookup-api
     restart: always
     env_file:
