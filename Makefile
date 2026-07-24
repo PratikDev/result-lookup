@@ -32,10 +32,13 @@ migrate-down:
 	down 1
 
 up:
-	docker compose up -d --build
+	docker compose up -d --build postgres redis api
 
 down:
 	docker compose down
+
+precompute:
+	docker compose run --rm precompute --year=$(year)
 
 db:
 	docker exec -it $(POSTGRES_HOST) psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
