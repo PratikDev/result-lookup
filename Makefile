@@ -43,6 +43,12 @@ precompute:
 db:
 	docker exec -it $(POSTGRES_HOST) psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
+db-seed:
+	docker exec -i $(POSTGRES_HOST) psql \
+	-U $(POSTGRES_USER) \
+	-d $(POSTGRES_DB) \
+	< $(CURDIR)/migrations/seed.sql
+
 redis:
 	docker exec -it redis redis-cli -a $(REDIS_PASSWORD)
 
