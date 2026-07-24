@@ -38,3 +38,11 @@ func Get(rdb *redis.Client, logger *slog.Logger, key string) (string, error) {
 
 	return val, nil
 }
+
+func Set(rdb *redis.Client, logger *slog.Logger, key string, value any) error {
+	err := rdb.Set(context.Background(), key, value, 0).Err()
+	if err != nil {
+		logger.Error("failed setting kv in redis.", "error", err.Error())
+	}
+	return err
+}
