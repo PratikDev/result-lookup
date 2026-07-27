@@ -37,6 +37,12 @@ up:
 down:
 	docker compose down
 
+up-test-db:
+	docker compose up -d postgres-test
+
+down-test-db:
+	docker compose down postgres-test
+
 precompute:
 	docker compose run --rm precompute --year=$(year)
 
