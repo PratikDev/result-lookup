@@ -9,11 +9,14 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/pratikdev/result-lookup/internal/testutils"
 	"github.com/redis/go-redis/v9"
 )
 
 var testValidator *validator.Validate
+var testFbDbPool *pgxpool.Pool
 var testMR *miniredis.Miniredis
 var testRDB *redis.Client
 var	testLogger *slog.Logger
@@ -31,6 +34,10 @@ func TestMain(m *testing.M) {
 
 	// validator setup
 	testValidator = validator.New()
+
+	// fallback db pool setup
+	testFbDbPool = testutils.InitTestDB()
+	testutils.SchemaSetup(testFbDbPool)
 
 	// miniredis setup
 	testMR, err = miniredis.Run()

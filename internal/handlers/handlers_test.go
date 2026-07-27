@@ -7,18 +7,28 @@ import (
 	"testing"
 
 	"github.com/pratikdev/result-lookup/internal/models"
+	"github.com/pratikdev/result-lookup/internal/testutils"
 )
 
 func TestGetResult(t *testing.T) {
 	// flush miniredis
 	testMR.FlushAll()
 
+	// truncate table
+	testutils.TruncateResultsTable(testFbDbPool)
+
+	// wrap GetResult func to
+	// prevent repeated args
+	gr := func (w *httptest.ResponseRecorder, r *http.Request) {
+		GetResult(w, r, testFbDbPool, testRDB, testLogger, testValidator)
+	}
+
 	t.Run("test invalid request (no search param)", func(t *testing.T) {
 		r := httptest.NewRequest(http.MethodGet, "/result", nil)
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("expected code: %d, got: %d", http.StatusBadRequest, w.Code)
 		}
@@ -30,7 +40,7 @@ func TestGetResult(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("expected code: %d, got: %d", http.StatusBadRequest, w.Code)
 		}
@@ -42,7 +52,7 @@ func TestGetResult(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("expected code: %d, got: %d", http.StatusBadRequest, w.Code)
 		}
@@ -54,7 +64,7 @@ func TestGetResult(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("expected code: %d, got: %d", http.StatusBadRequest, w.Code)
 		}
@@ -66,7 +76,7 @@ func TestGetResult(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("expected code: %d, got: %d", http.StatusBadRequest, w.Code)
 		}
@@ -80,7 +90,7 @@ func TestGetResult(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusServiceUnavailable {
 			t.Errorf("expected code: %d, got: %d", http.StatusServiceUnavailable, w.Code)
 		}
@@ -97,7 +107,7 @@ func TestGetResult(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusServiceUnavailable {
 			t.Errorf("expected code: %d, got: %d", http.StatusServiceUnavailable, w.Code)
 		}
@@ -114,7 +124,7 @@ func TestGetResult(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusNotFound {
 			t.Errorf("expected code: %d, got: %d", http.StatusNotFound, w.Code)
 		}
@@ -154,7 +164,7 @@ func TestGetResult(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// ping
-		GetResult(w, r, testRDB, testLogger, testValidator)
+		gr(w, r)
 		if w.Code != http.StatusOK {
 			t.Errorf("expected code: %d, got: %d", http.StatusOK, w.Code)
 		}

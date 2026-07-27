@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/pratikdev/result-lookup/internal/database"
 	"github.com/pratikdev/result-lookup/internal/handlers"
 	redisClient "github.com/pratikdev/result-lookup/internal/redis"
 )
@@ -18,6 +19,7 @@ import (
 func main() {
 	handler := slog.NewJSONHandler(os.Stderr, nil)
 	logger := slog.New(handler)
+	fbDbPool := database.InitFallbackDB(logger)
 	rdb := redisClient.InitRedis(logger)
 	validate := validator.New()
 	mux := http.NewServeMux()
@@ -31,7 +33,7 @@ func main() {
 		handlers.GetHealth(w, r)
 	})
 	mux.HandleFunc("GET /result", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetResult(w, r, rdb, logger, validate)
+		handlers.GetResult(w, r, fbDbPool, rdb, logger, validate)
 	})
 
 	port := os.Getenv("PORT")

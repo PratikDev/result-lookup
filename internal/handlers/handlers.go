@@ -8,8 +8,11 @@ import (
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pratikdev/result-lookup/internal/database"
 	"github.com/pratikdev/result-lookup/internal/models"
 	redisClient "github.com/pratikdev/result-lookup/internal/redis"
+	"github.com/pratikdev/result-lookup/internal/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -18,7 +21,7 @@ func GetHealth(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status": "ok"}`))
 }
 
-func GetResult(w http.ResponseWriter, r *http.Request, rdb *redis.Client, logger *slog.Logger, validate *validator.Validate) {
+func GetResult(w http.ResponseWriter, r *http.Request, fbDbPool *pgxpool.Pool, rdb *redis.Client, logger *slog.Logger, validate *validator.Validate) {
 	queryParams := r.URL.Query()
 
 	roll, err := strconv.Atoi(queryParams.Get("roll"))
@@ -81,6 +84,38 @@ func GetResult(w http.ResponseWriter, r *http.Request, rdb *redis.Client, logger
 		if errors.Is(err, redis.Nil) {
 			code = http.StatusNotFound
 			errorMsg = "didn't find result"
+		} else {
+			/* postgres fallback */
+
+
+			// we shouldn't kill the process
+			// if the fallback db connection failed
+			if fbDbPool == nil {
+				http.Error(w, errorMsg, code)
+				return
+			}
+
+			resultModel, err := database.GetResultFromDB(fbDbPool, requestBody.Roll, requestBody.Reg, requestBody.ExamYear)
+			if err != nil {
+				errorMsg = err.Error()
+				if errors.Is(err, database.ErrResultNotFound) {
+					code = http.StatusNotFound
+				}
+				http.Error(w, errorMsg, code)
+				return
+			}
+
+			result, err = utils.ToJSON(resultModel)
+			if err != nil {
+				logger.Error("result model to json process failed","error", err)
+				http.Error(w, "internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			// fallback succeeded
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(result))
+			return
 		}
 
 		http.Error(w, errorMsg, code)
