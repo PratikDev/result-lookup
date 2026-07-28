@@ -1,8 +1,8 @@
-# SSC Result Lookup
+# Result Lookup
 
-A high-throughput exam result lookup API simulating Bangladesh's SSC result publishing infrastructure — designed to serve roughly 2 million student results at a single fixed moment, under three hard constraints: responses must stay under 2 seconds even at peak load, the system must know instantly whether results are live yet, and it must never return a wrong or someone else's result.
+A system design and backend engineering practice project — the primary goal is reasoning through a hard scaling problem (millions of concurrent users, fixed latency budget, immutable data at publish time) and making deliberate architectural tradeoffs, not shipping a novel product.
 
-This is a backend engineering learning project. The focus is on the architectural decisions that make "serve fixed data fast to millions of concurrent users" a tractable problem — not on the novelty of the domain.
+The domain is Bangladesh's SSC like exam result publishing infrastructure. The system is designed to serve roughly 2 million student results at a single fixed moment, under three hard constraints: responses must stay under 2 seconds even at peak load, the system must know instantly whether results are live yet, and it must never return a wrong or someone else's result. Each constraint directly shaped an architecture decision — the Redis precompute pipeline, the publish gate, and the exact-match key design respectively.
 
 **Single instance benchmark:** Peak 31,910 RPS at , zero errors across 615,000 total requests (CPU-bound at 4 cores). Horizontal scaling to 2 instances behind a load balancer targets the full 40,000+ RPS peak load profile.
 
